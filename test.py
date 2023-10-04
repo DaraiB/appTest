@@ -6,13 +6,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 import numpy as np
 
-
 # Создаем модель
 model = Sequential([
-    Conv2D(32, (3,3), activation='relu', input_shape=(64, 64, 3)),
-    MaxPooling2D((2,2)),
-    Conv2D(64, (3,3), activation='relu'),
-    MaxPooling2D((2,2)),
+    Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)),
+    MaxPooling2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
     Flatten(),
     Dense(128, activation='relu'),
     Dropout(0.5),
@@ -27,13 +26,13 @@ model.summary()
 
 # Подготовка данных
 train_datagen = ImageDataGenerator(
-    rescale=1./255,
+    rescale=1. / 255,
     shear_range=0.2,
     zoom_range=0.2,
     horizontal_flip=True
 )
 
-test_datagen = ImageDataGenerator(rescale=1./255)
+test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 train_set = train_datagen.flow_from_directory(
     'maf_test',
@@ -56,10 +55,12 @@ model.fit(
     validation_data=test_set
 )
 
+
 # Оптимизированная функция для предсказания
 @tf.function
 def predict_with_model(test_image):
     return model(test_image)
+
 
 # Загрузка и предобработка тестового изображения
 test_image = image.load_img('maf/male/1 (217).jpg', target_size=(64, 64))
