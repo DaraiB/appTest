@@ -1,76 +1,78 @@
 import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
-from tensorflow.keras.layers import Activation, Dropout, Flatten, Dense
-from tensorflow.keras.optimizers import Adam
-
-# Задайте параметры нейронной сети
-input_shape = (150, 150, 3)  # Размеры входных изображений
-batch_size = 32
-epochs = 10
-
-# Создайте модель нейронной сети
-model = Sequential()
-
-model.add(Conv2D(32, (3, 3), input_shape=input_shape))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing import image
+import numpy as np
 
 
-model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+# Создаем модель
+model = Sequential([
+    Conv2D(32, (3,3), activation='relu', input_shape=(64, 64, 3)),
+    MaxPooling2D((2,2)),
+    Conv2D(64, (3,3), activation='relu'),
+    MaxPooling2D((2,2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(1, activation='sigmoid')
+])
 
-model.add(Conv2D(128, (3, 3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+# Компилируем модель
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-model.add(Flatten())
-model.add(Dense(64))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1))
-model.add(Activation('sigmoid'))
+# Выводим архитектуру модели
+model.summary()
 
-# Скомпилируйте модель
-model.compile(loss='binary_crossentropy',
-              optimizer=Adam(lr=0.0001),
-              metrics=['accuracy'])
-
-# Подготовьте данные и обучите модель
+# Подготовка данных
 train_datagen = ImageDataGenerator(
-    rescale=1.0/255,
+    rescale=1./255,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=True,
-    validation_split=0.2
+    horizontal_flip=True
 )
 
-# Обновите путь к папке с данными
-train_generator = train_datagen.flow_from_directory(
-    '/appTest/maf/f_f',  # Укажите полный путь к папке с данными
-    target_size=(150, 150),
-    batch_size=batch_size,
-    class_mode='binary',
-    subset='training'
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+train_set = train_datagen.flow_from_directory(
+    'maf_test',
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
 )
 
-validation_generator = train_datagen.flow_from_directory(
-    '/appTest/maf/m_f',  # Укажите полный путь к папке с данными
-    target_size=(150, 150),
-    batch_size=batch_size,
-    class_mode='binary',
-    subset='validation'
+test_set = test_datagen.flow_from_directory(
+    'maf',
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
 )
 
+# Обучение модели
 model.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // batch_size,
-    validation_data=validation_generator,
-    validation_steps=validation_generator.samples // batch_size,
-    epochs=epochs
+    train_set,
+    epochs=10,
+    validation_data=test_set
 )
 
-# Сохраните модель
-model.save('gender_detection_model.h5')
+# Оптимизированная функция для предсказания
+@tf.function
+def predict_with_model(test_image):
+    return model(test_image)
+
+# Загрузка и предобработка тестового изображения
+test_image = image.load_img('maf/male/1 (2).jpg', target_size=(64, 64))
+test_image = test_image.convert('RGB')  # Преобразуем в формат RGB
+test_image = image.img_to_array(test_image)
+test_image = np.expand_dims(test_image, axis=0)
+test_image /= 255.
+
+# Предсказание пола с использованием оптимизированной функции
+result = predict_with_model(test_image)
+
+if result[0][0] > 0.5:
+    prediction = 'Женский'
+else:
+    prediction = 'Мужской'
+
+print(f'Результат: {prediction}')
