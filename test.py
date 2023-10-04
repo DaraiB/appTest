@@ -61,7 +61,7 @@ def predict_with_model(test_image):
     return model(test_image)
 
 # Загрузка и предобработка тестового изображения
-test_image = image.load_img('maf/male/1 (2).jpg', target_size=(64, 64))
+test_image = image.load_img('maf/male/1 (217).jpg', target_size=(64, 64))
 test_image = test_image.convert('RGB')  # Преобразуем в формат RGB
 test_image = image.img_to_array(test_image)
 test_image = np.expand_dims(test_image, axis=0)
