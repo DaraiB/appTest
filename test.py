@@ -48,7 +48,7 @@ train_datagen = ImageDataGenerator(
 
 # Обновите путь к папке с данными
 train_generator = train_datagen.flow_from_directory(
-    '/path/to/male_and_female_faces_dataset',  # Укажите полный путь к папке с данными
+    '/appTest/maf/f_f',  # Укажите полный путь к папке с данными
     target_size=(150, 150),
     batch_size=batch_size,
     class_mode='binary',
@@ -56,7 +56,7 @@ train_generator = train_datagen.flow_from_directory(
 )
 
 validation_generator = train_datagen.flow_from_directory(
-    '/path/to/male_and_female_faces_dataset',  # Укажите полный путь к папке с данными
+    '/appTest/maf/m_f',  # Укажите полный путь к папке с данными
     target_size=(150, 150),
     batch_size=batch_size,
     class_mode='binary',
