@@ -1,5 +1,5 @@
-tensorflow
 keras
 opencv-python-headless
 matplotlib
 cvlib
+tensorflow
