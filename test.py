@@ -78,3 +78,15 @@ else:
     prediction = 'Мужской'
 
 print(f'Результат: {prediction}')
+
+# сохранение модели
+print("Загружаю сеть из файлов")
+# Загружаем данные об архитектуре сети
+json_file = open("maf.json", "r")
+loaded_model_json = json_file.read()
+json_file.close()
+# Создаем модель
+loaded_model = model_from_json(loaded_model_json)
+# Загружаем сохраненные веса в модель
+loaded_model.load_weights("maf.h5")
+print("Загрузка сети завершена")
